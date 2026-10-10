@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowPrompt Studio</title>
+<style>
+:root{
+  --bg:#f7f4df; --card:#fffef8; --ink:#171717; --muted:#777466;
+  --yellow:#ffd21c; --yellow2:#f4c400; --line:#e7e1c8; --dark:#171717;
+  --shadow:0 8px 28px rgba(25,25,20,.08); --radius:20px;
+}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,textarea,select{font:inherit} button{cursor:pointer}
+.app{display:flex;min-height:100vh}.side{width:245px;background:#fffdf2;border-right:1px solid var(--line);padding:22px 16px;position:sticky;top:0;height:100vh}
+.logo{font-weight:900;font-size:21px;letter-spacing:-1px;padding:8px 10px 24px}.logo span{background:var(--yellow);padding:4px 7px;border-radius:8px}
+.nav button{display:flex;gap:12px;width:100%;border:0;background:transparent;padding:13px 12px;border-radius:12px;text-align:left;margin:3px 0;font-weight:750;color:#333}
+.nav button.active,.nav button:hover{background:var(--yellow)} .icon{width:24px;text-align:center}
+.main{flex:1;padding:25px;max-width:1300px;margin:auto;width:100%}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}.top h1{font-size:28px;margin:0}.pill{background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-weight:700;font-size:13px}
+.hero{background:linear-gradient(120deg,#161616,#2b2b24);color:#fff;border-radius:24px;padding:30px;min-height:190px;display:flex;align-items:end;justify-content:space-between;box-shadow:var(--shadow);overflow:hidden}
+.hero h2{font-size:34px;line-height:1;margin:0 0 10px;max-width:650px}.hero p{color:#ddd;margin:0 0 20px}.btn{border:0;border-radius:12px;padding:12px 17px;font-weight:850}.primary{background:var(--yellow);color:#111}.secondary{background:#242424;color:#fff;border:1px solid #555}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:20px}.tool{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);cursor:pointer}.tool:hover{transform:translateY(-1px)}.tool .ti{background:var(--yellow);width:38px;height:38px;border-radius:10px;display:grid;place-items:center;margin-bottom:12px}.tool h3{margin:0 0 5px}.tool p{margin:0;color:var(--muted);font-size:14px}
+.panel{display:none}.panel.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);margin-top:18px}
+label{display:block;font-weight:800;margin:0 0 7px}textarea,input,select{width:100%;border:1px solid #dcd5ba;background:#fff;border-radius:12px;padding:13px;outline:none}textarea:focus,input:focus,select:focus{border-color:#b89c00;box-shadow:0 0 0 3px rgba(255,210,28,.2)}textarea{min-height:180px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.output{min-height:300px;background:#111;color:#eee;border-radius:14px;padding:17px;white-space:pre-wrap;line-height:1.55;font-family:ui-monospace,SFMono-Regular,monospace;font-size:13px}.hint{font-size:13px;color:var(--muted);margin-top:8px}.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.check{background:#fff;border:1px solid var(--line);padding:10px;border-radius:10px}.recent{display:flex;gap:10px;overflow:auto;margin-top:14px}.recent .item{min-width:180px;background:#171717;color:#fff;border-radius:13px;padding:12px}.toast{position:fixed;right:20px;bottom:20px;background:#111;color:#fff;padding:12px 16px;border-radius:12px;display:none;z-index:5}
+@media(max-width:800px){.side{display:none}.main{padding:15px}.grid,.row,.checks{grid-template-columns:1fr}.hero{min-height:230px}.hero h2{font-size:28px}.top h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="logo">FLOW<span>PROMPT</span></div>
+  <div class="nav">
+    <button class="active" data-panel="home"><span class="icon">⌂</span>Accueil</button>
+    <button data-panel="reprompt"><span class="icon">✦</span>Re-Prompt</button>
+    <button data-panel="video"><span class="icon">🎬</span>Video Prompts</button>
+    <button data-panel="image"><span class="icon">▣</span>Image Prompts</button>
+    <button data-panel="character"><span class="icon">👤</span>Character Lock</button>
+    <button data-panel="scene"><span class="icon">◈</span>Scene Builder</button>
+    <button data-panel="history"><span class="icon">↺</span>Historique</button>
+  </div>
+</aside>
+
+<main class="main">
+<div class="top"><h1 id="pageTitle">FlowPrompt Studio</h1><div class="pill">Prototype local • aucune clé API requise</div></div>
+
+<section id="home" class="panel active">
+  <div class="hero">
+    <div><h2>What are we creating today?</h2><p>Transforme tes idées en prompts vidéo et image clairs, cohérents et prêts à utiliser.</p>
+      <button class="btn primary" onclick="showPanel('reprompt')">Re-Prompt →</button>
+      <button class="btn secondary" onclick="showPanel('video')">Créer un prompt vidéo</button>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="tool" onclick="showPanel('reprompt')"><div class="ti">✦</div><h3>Re-Prompt</h3><p>Clarifie un prompt refusé ou mal interprété sans chercher à désactiver les protections du générateur.</p></div>
+    <div class="tool" onclick="showPanel('video')"><div class="ti">🎬</div><h3>Video Prompts</h3><p>Structure scène, caméra, mouvement, dialogue, audio et continuité.</p></div>
+    <div class="tool" onclick="showPanel('image')"><div class="ti">▣</div><h3>Image Prompts</h3><p>Crée des prompts image détaillés avec cadrage et rendu.</p></div>
+    <div class="tool" onclick="showPanel('character')"><div class="ti">👤</div><h3>Character Lock</h3><p>Centralise les attributs qui doivent rester identiques d'une scène à l'autre.</p></div>
+    <div class="tool" onclick="showPanel('scene')"><div class="ti">◈</div><h3>Scene Builder</h3><p>Construis une scène cinématographique en quelques champs.</p></div>
+    <div class="tool" onclick="showPanel('history')"><div class="ti">↺</div><h3>Historique</h3><p>Retrouve localement tes derniers prompts générés.</p></div>
+  </div>
+</section>
+
+<section id="reprompt" class="panel">
+  <div class="card">
+    <h2>✦ Re-Prompt</h2>
+    <p class="hint">Colle ton prompt. L'outil le réorganise, supprime les ambiguïtés et rend les contraintes explicites. Il ne contourne pas les systèmes de sécurité du générateur.</p>
+    <label>Prompt original</label><textarea id="rpInput" placeholder="Ex. Décris ma scène, les personnages, leurs vêtements, le décor, la caméra et les dialogues..."></textarea>
+    <div class="row" style="margin-top:14px">
+      <div><label>Langue de sortie</label><select id="rpLang"><option value="fr">Français</option><option value="en">English</option></select></div>
+      <div><label>Format</label><select id="rpFormat"><option>9:16 vertical</option><option>16:9 horizontal</option><option>1:1 carré</option></select></div>
+    </div>
+    <div class="actions"><button class="btn primary" onclick="rePrompt()">Optimiser le prompt</button><button class="btn secondary" onclick="clearBox('rpInput')">Effacer</button></div>
+  </div>
+  <div class="card"><h3>Prompt optimisé</h3><div id="rpOutput" class="output">Ton résultat apparaîtra ici.</div><div class="actions"><button class="btn primary" onclick="copyText('rpOutput')">Copier</button><button class="btn secondary" onclick="saveOutput('Re-Prompt',get('rpOutput'))">Sauvegarder</button></div></div>
+</section>
+
+<section id="video" class="panel">
+  <div class="card">
+    <h2>🎬 Video Prompt Builder</h2>
+    <div class="row">
+      <div><label>Scène / action</label><textarea id="vAction" style="min-height:120px" placeholder="Que se passe-t-il ?"></textarea></div>
+      <div><label>Personnages</label><textarea id="vChars" style="min-height:120px" placeholder="Âges, apparence, vêtements, relation..."></textarea></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div><label>Décor & moment</label><input id="vSet" placeholder="Restaurant élégant, nuit, lumière naturelle..."></div>
+      <div><label>Caméra</label><input id="vCam" placeholder="Medium shot, slow push-in, eye level..."></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div><label>Dialogue</label><textarea id="vDialog" style="min-height:110px" placeholder="PERSONNAGE: « ... »"></textarea></div>
+      <div><label>Contraintes de continuité</label><textarea id="vRules" style="min-height:110px" placeholder="Même visage, mêmes vêtements, même décor, aucun changement..."></textarea></div>
+    </div>
+    <div class="actions"><button class="btn primary" onclick="buildVideo()">Créer le prompt vidéo</button></div>
+  </div>
+  <div class="card"><h3>Prompt final</h3><div id="vOutput" class="output">Ton résultat apparaîtra ici.</div><div class="actions"><button class="btn primary" onclick="copyText('vOutput')">Copier</button></div></div>
+</section>
+
+<section id="image" class="panel">
+  <div class="card">
+    <h2>▣ Image Prompt Builder</h2>
+    <div class="row">
+      <div><label>Sujet</label><textarea id="iSubject" style="min-height:130px" placeholder="Décris précisément le sujet..."></textarea></div>
+      <div><label>Composition / caméra</label><textarea id="iCamera" style="min-height:130px" placeholder="Front-facing, medium shot, 50mm lens..."></textarea></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div><label>Décor / lumière</label><input id="iSet" placeholder="Salon moderne, lumière naturelle..."></div>
+      <div><label>Rendu</label><input id="iRender" value="photorealistic, cinematic, high detail, 4K"></div>
+    </div>
+    <div class="actions"><button class="btn primary" onclick="buildImage()">Créer le prompt image</button></div>
+  </div>
+  <div class="card"><h3>Prompt final</h3><div id="iOutput" class="output">Ton résultat apparaîtra ici.</div><div class="actions"><button class="btn primary" onclick="copyText('iOutput')">Copier</button></div></div>
+</section>
+
+<section id="character" class="panel">
+  <div class="card">
+    <h2>👤 Character Lock</h2><p class="hint">Crée une fiche de continuité à réutiliser dans toutes tes scènes.</p>
+    <div class="row">
+      <div><label>Nom / rôle</label><input id="cName" placeholder="Homme, 34 ans"></div>
+      <div><label>Apparence</label><input id="cLook" placeholder="Peau noire, cheveux courts, visage..."></div>
+      <div><label>Vêtements</label><input id="cClothes" placeholder="Veste bleu foncé, chemise blanche..."></div>
+      <div><label>Voix / comportement</label><input id="cVoice" placeholder="Voix masculine très basse, calme..."></div>
+    </div>
+    <div class="actions"><button class="btn primary" onclick="buildCharacter()">Créer Character Lock</button></div>
+  </div>
+  <div class="card"><div id="cOutput" class="output">Ta fiche apparaîtra ici.</div><div class="actions"><button class="btn primary" onclick="copyText('cOutput')">Copier</button></div></div>
+</section>
+
+<section id="scene" class="panel">
+  <div class="card">
+    <h2>◈ Scene Builder</h2>
+    <div class="row">
+      <div><label>Lieu</label><input id="sPlace" placeholder="Restaurant haut de gamme"></div>
+      <div><label>Heure</label><input id="sTime" placeholder="Nuit, vers 22h"></div>
+      <div><label>Action</label><input id="sAction" placeholder="Le couple discute calmement"></div>
+      <div><label>Caméra</label><input id="sCamera" placeholder="Cut direct, frontal, medium shot"></div>
+    </div>
+    <label style="margin-top:14px">Dialogues</label><textarea id="sDialog" placeholder="HOMME: « ... »&#10;FEMME: « ... »"></textarea>
+    <label style="margin-top:14px">Contraintes</label><textarea id="sRules" placeholder="Ne modifier ni les visages ni les vêtements. Aucun changement de décor. Lip-sync précis."></textarea>
+    <div class="actions"><button class="btn primary" onclick="buildScene()">Assembler la scène</button></div>
+  </div>
+  <div class="card"><div id="sOutput" class="output">Ta scène apparaîtra ici.</div><div class="actions"><button class="btn primary" onclick="copyText('sOutput')">Copier</button></div></div>
+</section>
+
+<section id="history" class="panel">
+  <div class="card"><h2>↺ Historique local</h2><p class="hint">Les créations sont conservées uniquement dans le navigateur de cet appareil.</p><div id="historyList"></div><div class="actions"><button class="btn secondary" onclick="clearHistory()">Vider l'historique</button></div></div>
+</section>
+
+<div class="toast" id="toast"></div>
+</main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id), get=id=>$(id).value;
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.panel===id));
+  const titles={home:'FlowPrompt Studio',reprompt:'Re-Prompt',video:'Video Prompts',image:'Image Prompts',character:'Character Lock',scene:'Scene Builder',history:'Historique'};
+  $('pageTitle').textContent=titles[id]||'FlowPrompt Studio';
+  if(id==='history') renderHistory();
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPanel(b.dataset.panel));
+function clean(s){return (s||'').trim().replace(/\s+/g,' ')}
+function rePrompt(){
+  const raw=clean(get('rpInput')); if(!raw){toast('Colle d’abord un prompt.');return}
+  const lang=get('rpLang'), fmt=get('rpFormat');
+  let body=raw.replace(/\b(j'ai|j’ai|je veux|fais|crée|faire)\b/gi,'').trim();
+  const fr=`OBJECTIF\nCréer exactement la scène décrite ci-dessous, avec une mise en scène cinématographique claire.\n\nSCÈNE\n${body}\n\nCAMÉRA\nDéfinir clairement le cadrage, l’angle, la distance et le mouvement de caméra. Ne pas changer de cadrage sans indication explicite.\n\nPERSONNAGES ET CONTINUITÉ\nConserver exactement les caractéristiques décrites pour chaque personnage : visage, âge apparent, coiffure, vêtements, accessoires et position. Ne pas inventer de nouveaux éléments.\n\nACTION\nRespecter l’ordre chronologique des actions. Un seul événement à la fois, avec des transitions naturelles.\n\nDIALOGUE ET AUDIO\nAttribuer chaque réplique au bon personnage. Prononciation et lip-sync cohérents avec le dialogue. Ne pas ajouter de dialogue non demandé.\n\nSTYLE VISUEL\nRendu réaliste et cinématographique, mouvements naturels, anatomie cohérente, décor stable, éclairage cohérent.\n\nFORMAT\n${fmt}.\n\nIMPORTANT\nNe pas modifier les éléments explicitement définis. Si une information n’est pas fournie, ne pas ajouter de détail inutile.`;
+  const en=`GOAL\nCreate exactly the scene described below with clear cinematic direction.\n\nSCENE\n${body}\n\nCAMERA\nClearly define framing, angle, camera distance and movement. Do not change framing unless explicitly requested.\n\nCHARACTERS & CONTINUITY\nKeep every stated character attribute consistent: face, apparent age, hairstyle, clothing, accessories and position. Do not invent new details.\n\nACTION\nFollow the actions in chronological order. One event at a time, with natural transitions.\n\nDIALOGUE & AUDIO\nAssign every line to the correct character. Keep pronunciation and lip-sync consistent with the dialogue. Do not add dialogue that was not requested.\n\nVISUAL STYLE\nRealistic cinematic rendering, natural movement, coherent anatomy, stable environment and consistent lighting.\n\nFORMAT\n${fmt}.\n\nIMPORTANT\nDo not alter explicitly defined elements. If information is missing, avoid unnecessary invention.`;
+  $( 'rpOutput').textContent=lang==='en'?en:fr; saveHistory('Re-Prompt',$( 'rpOutput').textContent); toast('Prompt optimisé.');
+}
+function buildVideo(){
+ const out=`VIDEO PROMPT — CINEMATIC\n\nCHARACTERS\n${clean(get('vChars'))||'Use the characters described by the user.'}\n\nSETTING\n${clean(get('vSet'))||'Consistent environment matching the scene.'}\n\nACTION / CHRONOLOGY\n${clean(get('vAction'))}\n\nCAMERA\n${clean(get('vCam'))||'Medium shot, stable cinematic camera.'}\n\nDIALOGUE\n${clean(get('vDialog'))||'No dialogue unless specified.'}\n\nCONTINUITY RULES\n${clean(get('vRules'))||'Keep faces, clothing, environment and character positions consistent. No unnecessary changes.'}\n\nVISUAL / AUDIO\nPhotorealistic cinematic look, natural motion, coherent lighting, accurate lip-sync, clean ambient audio. 9:16 vertical, 4K if supported.`;
+ $('vOutput').textContent=out; saveHistory('Video Prompt',out); toast('Prompt vidéo créé.');
+}
+function buildImage(){
+ const out=`IMAGE PROMPT\n\nSUBJECT\n${clean(get('iSubject'))}\n\nCOMPOSITION & CAMERA\n${clean(get('iCamera'))||'Balanced cinematic composition, natural perspective.'}\n\nSETTING & LIGHTING\n${clean(get('iSet'))||'Coherent environment and natural lighting.'}\n\nRENDERING\n${clean(get('iRender'))}\n\nCONSISTENCY\nPreserve all explicitly requested facial features, clothing, proportions, objects and scene geometry. Avoid unnecessary additions or alterations.\n\nOUTPUT\nHigh-quality final image, clean details, coherent anatomy and stable composition.`;
+ $('iOutput').textContent=out; saveHistory('Image Prompt',out); toast('Prompt image créé.');
+}
+function buildCharacter(){
+ const out=`CHARACTER LOCK\n\nIDENTITY / ROLE\n${clean(get('cName'))}\n\nAPPEARANCE\n${clean(get('cLook'))}\n\nCLOTHING\n${clean(get('cClothes'))}\n\nVOICE / BEHAVIOR\n${clean(get('cVoice'))}\n\nCONTINUITY DIRECTIVE\nUse this exact character profile in every subsequent scene. Keep face, age appearance, hairstyle, clothing, proportions and voice consistent. Do not redesign the character unless explicitly instructed.`;
+ $('cOutput').textContent=out; saveHistory('Character Lock',out); toast('Character Lock créé.');
+}
+function buildScene(){
+ const out=`SCENE BLUEPRINT\n\nLOCATION\n${clean(get('sPlace'))}\n\nTIME / LIGHT\n${clean(get('sTime'))}\n\nACTION\n${clean(get('sAction'))}\n\nCAMERA\n${clean(get('sCamera'))}\n\nDIALOGUE\n${clean(get('sDialog'))}\n\nSTRICT CONTINUITY\n${clean(get('sRules'))}\n\nPRODUCTION NOTES\nNatural performance, coherent blocking, stable environment, clear character attribution, accurate lip-sync, cinematic realism, no unrequested changes.`;
+ $('sOutput').textContent=out; saveHistory('Scene Builder',out); toast('Scène assemblée.');
+}
+function copyText(id){
+ navigator.clipboard.writeText($(id).textContent).then(()=>toast('Copié dans le presse-papiers.'));
+}
+function clearBox(id){$(id).value=''}
+function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',1800)}
+function saveHistory(type,text){if(!text||text.includes('Ton résultat'))return;let h=JSON.parse(localStorage.getItem('fps_history')||'[]');h.unshift({type,text,date:new Date().toLocaleString('fr-FR')});localStorage.setItem('fps_history',JSON.stringify(h.slice(0,20)));renderHistory()}
+function renderHistory(){const h=JSON.parse(localStorage.getItem('fps_history')||'[]');$('historyList').innerHTML=h.length?h.map((x,i)=>`<div class="card" style="margin-top:10px"><b>${x.type}</b><span class="hint"> • ${x.date}</span><div class="output" style="min-height:80px;margin-top:9px;max-height:180px;overflow:auto">${escapeHtml(x.text)}</div><button class="btn secondary" style="margin-top:8px" onclick="navigator.clipboard.writeText(${JSON.stringify(x.text)});toast('Copié.')">Copier</button></div>`).join(''):'<p class="hint">Aucune création pour le moment.</p>'}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function clearHistory(){localStorage.removeItem('fps_history');renderHistory();toast('Historique vidé.')}
+</script>
+</body>
+</html>
