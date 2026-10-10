@@ -161,17 +161,17 @@ jobs:
                   }
               }
           }
-          EOF
+          EQF
 
-      - name: Install Android SDK
-        shell: bash
-        run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
       - name: Build APK
         run: |
-          gradle :app:assembleDebug
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
